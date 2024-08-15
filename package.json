@@ -1,0 +1,19 @@
+{
+  "name": "marker-to-youtrack",
+  "version": "1.0.0",
+  "description": "Simple bridge from Marker.io to a YouTrack instance",
+  "main": "src/index.mjs",
+  "type": "module",
+  "keywords": [],
+  "author": "Alyxia Sother",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "puppeteer": "^23.1.0",
+    "youtrack-rest-client": "^1.6.0",
+    "express": "^4.19.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.21"
+  }
+}
