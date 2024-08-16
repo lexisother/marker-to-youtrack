@@ -78,11 +78,33 @@ server.post('/', async (req, res) => {
   const marker = markerProjects.find((p) => p.id === markerData.destination.id);
   const project = await youtrack.projects.byId(marker.ytProject);
 
+  let description = `${markerData.issue.description}\n--\n`;
+
+  // TODO: Figure out what ID we have to use here, because it's not the reporter ID
+  // description +=
+  //   `**Reported by:** ${markerData.reporter.name} (${markerData.reporter.email})` +
+  //   ` - [Contact via Marker.io](https://app.marker.io/i/${markerData.reporter.id}?advanced=1&comments=1)\n`;
+
+  description += `**Source URL:** ${markerData.website.url}\n`;
+
+  description += `**Issue details: [Open in Marker.io](${markerData.issue.publicUrl})\n`;
+
   let table = new TableBuilder()
     .setHeaders(['Property', 'Value'])
     .addRow(['Device type', markerData.context.contextString.match(/[^,]*$/g)[0].trim()])
+    .addRow(['Browser', `${markerData.context.browser.name} ${markerData.context.browser.version}`])
+    .addRow([
+      'Screen Size',
+      `${markerData.context.screenSize.width}x${markerData.context.screenSize.height}`,
+    ])
+    .addRow([
+      'Viewport Size',
+      `${markerData.context.viewport.width}x${markerData.context.viewport.height}`,
+    ])
+    .addRow(['Zoom Level', markerData.context.zoom.zoomFactor ?? '100%'])
+    .addRow(['Pixel Ratio', `@${markerData.context.screenSize.pixelRatio}x`])
     .build();
-  let description = `${markerData.issue.description}\n--\n${table}`;
+  description += table;
 
   const issue = await youtrack.issues.create({
     project: {
