@@ -2,7 +2,9 @@ import dotenv from 'dotenv';
 import puppeteer from 'puppeteer';
 import express from 'express';
 import { Youtrack } from 'youtrack-rest-client';
+import { axiosInstance as axios } from 'youtrack-rest-client/dist/axios.js';
 import { TableBuilder } from './table.mjs';
+import { generateBoundary } from './utils.mjs';
 
 dotenv.config();
 
@@ -87,7 +89,7 @@ server.post('/', async (req, res) => {
 
   description += `**Source URL:** ${markerData.website.url}\n`;
 
-  description += `**Issue details: [Open in Marker.io](${markerData.issue.publicUrl})\n`;
+  description += `**Issue details**: [Open in Marker.io](${markerData.issue.publicUrl})\n\n`;
 
   let table = new TableBuilder()
     .setHeaders(['Property', 'Value'])
@@ -112,6 +114,18 @@ server.post('/', async (req, res) => {
     },
     summary: `[Marker.io] ${markerData.issue.title}`,
     description,
+  });
+
+  const image = await (await fetch(markerData.issue.screenshotUrl)).blob();
+
+  // Very hackily manually upload the attachment
+  const form = new FormData();
+  form.append('upload', image, 'screenshot.jpeg');
+  axios.post(`${youtrack.baseUrl}/issues/${issue.id}/attachments`, form, {
+    headers: {
+      ...youtrack.defaultRequestOptions.headers,
+      'Content-Type': `multipart/form-data; boundary=${generateBoundary()}`,
+    },
   });
 
   res.send('OK');
